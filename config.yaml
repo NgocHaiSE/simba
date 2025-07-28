@@ -1,0 +1,69 @@
+project:
+  name: "Simba"
+  version: "1.0.0"
+  api_version: "/api/v1"
+
+paths:
+  base_dir: null  # Will be set programmatically
+  faiss_index_dir: "vector_stores/faiss_index"
+  vector_store_dir: "vector_stores"
+
+llm:
+  provider: "openai" #OPTIONS:ollama,openai
+  model_name: "gpt-4o-mini"
+  temperature: 0.0
+  max_tokens: null
+  streaming: true
+  additional_params: {}
+
+embedding:
+  provider: "huggingface"
+  model_name: "BAAI/bge-base-en-v1.5"
+  device: "cpu"  # OPTIONS: cpu,cuda,mps
+  additional_params: {}
+
+vector_store:
+  provider: "pgvector"
+  collection_name: "simba_collection"
+
+  additional_params: {}
+
+chunking:
+  chunk_size: 512
+  chunk_overlap: 200
+
+retrieval:
+  method: "hybrid" # OPTIONS: default, semantic, keyword, hybrid, ensemble, reranked
+  k: 5
+  # Method-specific parameters
+  params:
+    # Semantic retrieval parameters
+    score_threshold: 0.5
+    
+    # Hybrid retrieval parameters
+    prioritize_semantic: true
+    
+    # Ensemble retrieval parameters
+    weights: [0.7, 0.3]  # Weights for semantic and keyword retrievers
+    
+    # Reranking parameters
+    reranker_model: colbert
+    reranker_threshold: 0.7
+
+# Database configuration
+# database:
+#   provider: litedb # Options: litedb, sqlite
+#   additional_params: {}
+
+database:
+  provider: postgres
+  host: 127.0.0.1
+  port: 5433
+  user: postgres
+  password: 08032003
+  dbname: vectordb
+  additional_params: {}
+
+celery: 
+  broker_url: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+  result_backend: ${CELERY_RESULT_BACKEND:-redis://redis:6379/1}
